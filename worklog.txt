@@ -1,0 +1,173 @@
+value %h tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_cevatl421.cevatl42x_sys.cevatl4x1_core.cevaTL4x1_pcu_top.pblock_repeat.pal_pc_d1_r[31:0]
+audio 的power 状态可以看如下寄存器：
+tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_aud_aon.u_aud_pwrctrl_aon.pwr_st[4:0]
+ 不同值对应的状态如下：
+define  AUD_PWR_OFF                           5'h0    // PWR_OFF
+`define  AUD_ACTIVE                              5'h8   // PWR_ON
+`define  AUD_CLK_GT                              5'h9    // CLOCK GATE
+`define  AUD_VCOXO_OFF_PWRON        5'hb     // PLL OFF
+
+
+
+value %h tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_aud_aon.u_aud_pwrctrl_aon.pwr_st[4:0]
+
+
+value %h tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_aud_aon.u_aud_pwrctrl_aon.pwr_st[4:0]
+
+
+force tb.U_dut.GPIO_74
+
+
+void switch_to_pll7()
+{
+	trace("change audio clock to pll7 \n");
+	// reg_set_bit(PMU_AUD_CLK_RES,0x2 ,4, 2);/*clk divd*///for audio test
+	reg_set_bit(PMU_AUD_CLK_RES, 0x4, 7, 3);	//ppll 7
+	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 15, 1);	//fc
+}
+
+
+void switch_to_pll7(char *id)
+{	
+	struct clk *adsp_clk;
+	int ret;
+
+	init_and_install_clocks();
+	adsp_clk = clk_get(id);
+		
+	if(adsp_clk) {
+		trace("adsp clock is %s \n",adsp_clk->name);
+	} else {
+		trace("adsp clock is error!!!\n");
+			return ;
+	}
+	
+	ret = clk_enable(adsp_clk);
+	
+	if(ret < 0)
+		trace("adsp enable error!!!\n");
+
+	ret = clk_set_rate(adsp_clk, adsp_clk->rate);
+	if(ret < 0)
+		trace("change audio clock to pll7 fail!!!\n");
+}
+
+switch_to_pll7("audio clk_pll7_div2");
+
+//timer.c
+void delay_ms(unsigned int ms)
+{
+	volatile unsigned int count, now;
+	
+	timer_clk_init();
+	count = (ms*32768)/1000;
+	
+	io_write32(REGS_TIMER_BASE + TMR_CCR_REG, 0x1);	//  timer select 32768 of timer0
+
+	/* set timer free-run mode */
+	io_reg_set_bits(REGS_TIMER_BASE + TMR_COUNT_MODE_REG, 1 << 0);
+	io_write32(REGS_TIMER_BASE + TMR_PRELOAD_CTRL_REG(0), 0x4);
+
+	/* enable count */
+	io_reg_set_bits(REGS_TIMER_BASE + TMR_COUNT_EN_REG, 1 << 0);
+
+	now = __get_count_val(0);
+	while(count > (__get_count_val(0) - now));
+}
+
+extern void delay_ms(unsigned int ms);
+int adsp_dump_ap_pmu_sts()
+{
+#define		REGS_MAIN_BASE				0xD4050000
+#define 	REG_MAIN_CPSR		    	(REGS_MAIN_BASE + 0x0004)
+#define 	EG_MAIN_SCCR			    (REGS_MAIN_BASE + 0x0038)
+#define 	REG_MAIN_APSLPW			    (REGS_MAIN_BASE + 0x1000)
+#define 	REG_MAIN_PWRMODE_STAUTS		(REGS_MAIN_BASE + 0x1030)
+#define 	REG_MAIN_AWUCRS			    (REGS_MAIN_BASE + 0x1048)
+#define 	REG_MAIN_AWUCRM			    (REGS_MAIN_BASE + 0x104C)
+
+	while(1){
+		
+		pr_dbg("REG_MAIN_CPSR(addr:0xD4050004,			value:0x%x)\n\n", io_read32(REG_MAIN_CPSR));
+		pr_dbg("REG_MAIN_SCCR(addr:0xD4050038,			value:0x%x)\n\n", io_read32(EG_MAIN_SCCR));
+		pr_dbg("REG_MAIN_APSLPW(addr:0xD4051000,			value:0x%x)\n\n", io_read32(REG_MAIN_APSLPW));
+		pr_dbg("REG_MAIN_PWRMODE_STAUTS(addr:0xD4051030,		value:0x%x)\n\n", io_read32(REG_MAIN_PWRMODE_STAUTS));
+		pr_dbg("REG_MAIN_AWUCRS(addr:0xD4051048,			value:0x%x)\n\n", io_read32(REG_MAIN_AWUCRS));
+		pr_dbg("REG_MAIN_AWUCRM(addr:0xD405104C,			value:0x%x)\n\n", io_read32(REG_MAIN_AWUCRM));
+
+		delay_ms(1000);
+
+	}
+	
+	
+	return 0;
+}
+
+int tl4_start()
+{	
+	adsp_boot_normal();
+	audio_island_run();
+
+	return 0;
+}
+
+int enter_tl4_shell()
+{	
+	adsp_boot_normal();
+	REG32(LOG_TARGET_ADDR)= (LOG_TL4_SHELL | LOG_TL4_UART);
+	
+	audio_island_run();
+
+	return 0;
+}
+
+void switch_to_pll7(char *id)
+{
+#if 1
+	struct clk *adsp_clk;
+	int ret;
+
+	init_and_install_clocks();
+	adsp_clk = clk_get(id);
+
+	if(adsp_clk) {
+		trace("adsp clock is %s \n",adsp_clk->name);
+	} else {
+		trace("adsp clock is error!!!\n");
+			return ;
+	}
+
+	ret = clk_enable(adsp_clk);
+
+	if(ret < 0)
+		trace("adsp enable error!!!\n");
+
+	ret = clk_set_rate(adsp_clk, adsp_clk->rate);
+	if(ret < 0)
+		trace("change audio clock to pll7 fail!!!\n");
+#else
+	unsigned int rdata;
+	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	//clock on
+	REG32 (0xc088c038) = 0x31;	//axi/apb div
+	reg_set_bit(PMU_AUD_CLK_RES,0x6 ,7, 3  );
+	reg_set_bit(PMU_AUD_CLK_RES,0x1 ,15, 1);//fc
+
+	do{   
+		rdata = REG32(PMU_AUD_CLK_RES);   
+		trace("PMU status:0x%x.\n", rdata); 
+	}while( ( rdata & 0x8000) != 0 );
+	//reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	//clock on
+#endif
+}
+
+void __gpi_intr_handler(void *arg)
+{
+	unsigned int data =0x0;
+	struct gpi_priv *_priv = (struct gpi_priv *)arg;
+	pr_dbg("GPI %d Interrupt Triggerred\n", _priv->id);
+	//int clr
+	//data = io_read32(SHUB_GPIO_CTRL) & (~(1 << (_priv->id + 8)));
+	//io_write32(SHUB_GPIO_CTRL, data);
+	return ;
+}
+

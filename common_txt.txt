@@ -1,0 +1,42 @@
+data.load.elf "X:\proj\baremetal-test\baremetal-test\ctest\build\aquila_evb\img\tl4\aquila_evb_tl4_test.axf"  /StripPART  "/home/shsw/asr/proj/baremetal-test/baremetal-test/ctest" /PATH "X:\asr\proj\baremetal-test\baremetal-test\ctest"
+
+
+@3776 [Ctest] python scripts tool to verify register interface
+
+        1. add reg_verify.py to scan register bit.
+        2. add xml_parser.py to parse xml file.
+        3. add xml_file.py to specify directory of xml files.
+        4. modify jtag_t32.py to add function of read/write memory.
+        5. add readme file to introduce reg_verify script.
+		
+		
+		
+		
+Audio 文档
+\\fileserver\public-share\USER\pingwang\aquilaC
+
+
+
+git push:
+git push origin HEAD:refs/for/master
+
+
+bitfile:
+\\fileserver\public-share\FPGA\aquila_c\multi_media\20170901_audio_shub\20170901_audio_shubd_60mhz\designs
+
+
+硬件原理图：
+
+\\sh2-filer02\Data\HW\Aquila
+
+
+Lab04:
+10.1.50.76
+
+Data.LOAD \\10.1.50.121\asr\proj\baremetal-test\baremetal-test\ctest\build\project\aquilac_fpga\tl4_case.elf  /strippart 8 /SOURCEPATH \\10.1.50.121\asr\proj\baremetal-test\baremetal-test\ctest
+
+setenv LM_LICENSE_FILE ${LM_LICENSE_FILE}:5280@lic_z1
+
+Git command:
+git stash ------恢复工作库版本和服务器一致；
+git stash apply--------恢复之前本地修改

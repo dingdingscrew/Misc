@@ -171,3 +171,34 @@ void __gpi_intr_handler(void *arg)
 	return ;
 }
 
+int i;
+ 	int ret=0;
+	int ch[64]= { 0,};
+	//io_write32(0xc088d010, (io_read32(0xc088d010) | 0x10));
+	
+ 	for (i = 0; i < 64; i++)
+		putchar (i & 0xFF);
+
+    for (i = 0; i < 64; i++){
+
+		ch[i] = getchar();
+
+		if ((ch[i] & 0xFF) != (i & 0xFF))
+	    {
+	    	ret =1;
+	     	break;
+	    }
+	}
+
+	//io_write32(0xc088d010, (io_read32(0xc088d010) & ~(0x10)));
+	if(ret > 0)
+		//puts("loop mode test fail.\n");
+		io_write32(0x200004, 1);
+	else
+		io_write32(0x200000, 1);
+		//puts("loop mode test pass.\n");
+	for (i = 0; i < 64; i++){
+		//puts("receive data:%d.\n", ch[i]);
+		io_write32(0xc0810000 + i*0x4, ch[i]);
+	}
+	while(1);

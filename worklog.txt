@@ -2,10 +2,10 @@ value %h tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_c
 audio 的power 状态可以看如下寄存器：
 tb.U_dut.u_ap_wrp.u_app_top.u_audio_island_wrap_iso.aud_island_wrap.u_aud_aon.u_aud_pwrctrl_aon.pwr_st[4:0]
  不同值对应的状态如下：
-define  AUD_PWR_OFF                           5'h0    // PWR_OFF
-`define  AUD_ACTIVE                              5'h8   // PWR_ON
-`define  AUD_CLK_GT                              5'h9    // CLOCK GATE
-`define  AUD_VCOXO_OFF_PWRON        5'hb     // PLL OFF
+define  AUD_PWR_OFF                           5'h0    \\ PWR_OFF
+`define  AUD_ACTIVE                              5'h8   \\ PWR_ON
+`define  AUD_CLK_GT                              5'h9    \\ CLOCK GATE
+`define  AUD_VCOXO_OFF_PWRON        5'hb     \\ PLL OFF
 
 
 
@@ -21,9 +21,9 @@ force tb.U_dut.GPIO_74
 void switch_to_pll7()
 {
 	trace("change audio clock to pll7 \n");
-	// reg_set_bit(PMU_AUD_CLK_RES,0x2 ,4, 2);/*clk divd*///for audio test
-	reg_set_bit(PMU_AUD_CLK_RES, 0x4, 7, 3);	//ppll 7
-	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 15, 1);	//fc
+	\\ reg_set_bit(PMU_AUD_CLK_RES,0x2 ,4, 2);\*clk divd*\\\for audio test
+	reg_set_bit(PMU_AUD_CLK_RES, 0x4, 7, 3);	\\ppll 7
+	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 15, 1);	\\fc
 }
 
 
@@ -54,21 +54,21 @@ void switch_to_pll7(char *id)
 
 switch_to_pll7("audio clk_pll7_div2");
 
-//timer.c
+\\timer.c
 void delay_ms(unsigned int ms)
 {
 	volatile unsigned int count, now;
 	
 	timer_clk_init();
-	count = (ms*32768)/1000;
+	count = (ms*32768)\1000;
 	
-	io_write32(REGS_TIMER_BASE + TMR_CCR_REG, 0x1);	//  timer select 32768 of timer0
+	io_write32(REGS_TIMER_BASE + TMR_CCR_REG, 0x1);	\\  timer select 32768 of timer0
 
-	/* set timer free-run mode */
+	\* set timer free-run mode *\
 	io_reg_set_bits(REGS_TIMER_BASE + TMR_COUNT_MODE_REG, 1 << 0);
 	io_write32(REGS_TIMER_BASE + TMR_PRELOAD_CTRL_REG(0), 0x4);
 
-	/* enable count */
+	\* enable count *\
 	io_reg_set_bits(REGS_TIMER_BASE + TMR_COUNT_EN_REG, 1 << 0);
 
 	now = __get_count_val(0);
@@ -147,16 +147,16 @@ void switch_to_pll7(char *id)
 		trace("change audio clock to pll7 fail!!!\n");
 #else
 	unsigned int rdata;
-	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	//clock on
-	REG32 (0xc088c038) = 0x31;	//axi/apb div
+	reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	\\clock on
+	REG32 (0xc088c038) = 0x31;	\\axi\apb div
 	reg_set_bit(PMU_AUD_CLK_RES,0x6 ,7, 3  );
-	reg_set_bit(PMU_AUD_CLK_RES,0x1 ,15, 1);//fc
+	reg_set_bit(PMU_AUD_CLK_RES,0x1 ,15, 1);\\fc
 
 	do{   
 		rdata = REG32(PMU_AUD_CLK_RES);   
 		trace("PMU status:0x%x.\n", rdata); 
 	}while( ( rdata & 0x8000) != 0 );
-	//reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	//clock on
+	\\reg_set_bit(PMU_AUD_CLK_RES, 0x1, 12, 1);	\\clock on
 #endif
 }
 
@@ -165,16 +165,17 @@ void __gpi_intr_handler(void *arg)
 	unsigned int data =0x0;
 	struct gpi_priv *_priv = (struct gpi_priv *)arg;
 	pr_dbg("GPI %d Interrupt Triggerred\n", _priv->id);
-	//int clr
-	//data = io_read32(SHUB_GPIO_CTRL) & (~(1 << (_priv->id + 8)));
-	//io_write32(SHUB_GPIO_CTRL, data);
+	\\int clr
+	\\data = io_read32(SHUB_GPIO_CTRL) & (~(1 << (_priv->id + 8)));
+	\\io_write32(SHUB_GPIO_CTRL, data);
 	return ;
 }
 
+\\test uart loop----20171218
 int i;
  	int ret=0;
 	int ch[64]= { 0,};
-	//io_write32(0xc088d010, (io_read32(0xc088d010) | 0x10));
+	\\io_write32(0xc088d010, (io_read32(0xc088d010) | 0x10));
 	
  	for (i = 0; i < 64; i++)
 		putchar (i & 0xFF);
@@ -190,15 +191,385 @@ int i;
 	    }
 	}
 
-	//io_write32(0xc088d010, (io_read32(0xc088d010) & ~(0x10)));
+	\\io_write32(0xc088d010, (io_read32(0xc088d010) & ~(0x10)));
 	if(ret > 0)
-		//puts("loop mode test fail.\n");
+		\\puts("loop mode test fail.\n");
 		io_write32(0x200004, 1);
 	else
 		io_write32(0x200000, 1);
-		//puts("loop mode test pass.\n");
+		\\puts("loop mode test pass.\n");
 	for (i = 0; i < 64; i++){
-		//puts("receive data:%d.\n", ch[i]);
+		\\puts("receive data:%d.\n", ch[i]);
 		io_write32(0xc0810000 + i*0x4, ch[i]);
 	}
 	while(1);
+	
+\\test_i2c------2017\12\25
+
+#define BMA253_CHIPID_REG (0x00)
+#define BMA253_CHIPID_VAL (0xFA)
+#define BMA253_I2C_ADDR  (0x18 << 1)
+
+int test_i2c0(void)
+{
+	char reg, val, tx[2];
+	int rval = 0;
+	pr_dbg("test_i2c0 start!\n");
+	rval |= i2c_bus_init(0, I2C_FAST_MODE);
+
+	\* reset sensor *\
+	tx[0] = 0x14;
+	tx[1] = 0xB6;
+	rval |= i2c_dev_write(0, BMA253_I2C_ADDR, tx, 2);
+	pr_dbg("sensor reset!\n");
+
+	reg = BMA253_CHIPID_REG;
+	rval |= i2c_dev_read(0, BMA253_I2C_ADDR, &reg, 1, &val, 1);
+	pr_dbg("BMA253 ID: 0x%x\n", val);
+
+	if (val != BMA253_CHIPID_VAL)
+		return -1;
+
+	pr_dbg("%s done!\n", __func__);
+	return rval;
+}
+
+#define LTR_579ALS_ID_REG   (0x06)
+#define LTR_579ALS_ID_VAL   (0xB1)
+#define LTR_579ALS_I2C_ADDR (0x53 << 1)
+
+int test_i2c1(void)
+{
+	char reg, val, tx[2];
+	int rval = 0;
+	pr_dbg("test_i2c1 start!\n");
+	rval |= i2c_bus_init(1, I2C_FAST_MODE);
+
+	\* reset sensor *\
+	tx[0] = 0;
+	tx[1] = 0x10;
+	rval |= i2c_dev_write(1, LTR_579ALS_I2C_ADDR, tx, 2);
+	pr_dbg("sensor reset!\n");
+
+	reg = LTR_579ALS_ID_REG;
+	rval |= i2c_dev_read(1, LTR_579ALS_I2C_ADDR, &reg, 1, &val, 1);
+	pr_dbg("LTR579ALS ID: 0x%x\n", val);
+
+	if (val != LTR_579ALS_ID_VAL)
+		return -1;
+
+	pr_dbg("%s done!\n", __func__);
+	return 0;
+}
+
+__define_test_case_common(I2C0, "i2c0 test", test_i2c0, CASE_I2C0);
+__define_test_case_common(I2C1, "i2c1 test", test_i2c1, CASE_I2C1);
+
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+if [ $1 == "autoModule" ];then
+        if [ $# -lt 3 ];then
+                echo "usage: .\make.sh autoModule project_name module_name"
+                exit
+        fi
+        .\tool\autoModule\autoModule.py $3 $2
+        exit
+fi
+
+char i2c_fifo_rx_8a_8d(int port_idx, char slave_addr, char reg_addr)
+{
+	uint32_t port_base = twsi_base[port_idx];
+	char value;
+	volatile int c00,c01;
+	volatile int c10,c11;
+	volatile int c20,c21;
+	volatile int c30,c31;
+	volatile int c40,c41;
+
+	if ((I2C_HS_MODE == i2c_fast_mode[port_idx])
+	    || (I2C_HS_MODE_FAST == i2c_fast_mode[port_idx]))
+		io_write32(TWSI_WFIFO + port_base, START_BYTE_CNTROL | 0x0e);
+\*
+#if 0
+		c00 = io_read32(TWSI_WFIFO_WPTR + port_base);
+		c01 = io_read32(TWSI_WFIFO_WPTR + port_base);
+#else
+		c00 = io_read32(TWSI_WFIFO_RPTR + port_base);
+		c01 = io_read32(TWSI_WFIFO_RPTR + port_base);
+#endif*\
+	io_write32(TWSI_WFIFO + port_base,
+		   START_BYTE_CNTROL | I2C_SLAVE_WRITE(slave_addr));
+	i2c_wait_tx_empty(port_idx);
+\*	
+#if 0
+	c10 = io_read32(TWSI_WFIFO_WPTR + port_base);
+	c11 = io_read32(TWSI_WFIFO_WPTR + port_base);
+#else
+	c10 = io_read32(TWSI_WFIFO_RPTR + port_base);
+	c11 = io_read32(TWSI_WFIFO_RPTR + port_base);
+#endif*\
+	io_write32(TWSI_WFIFO + port_base, TB_CNTROL | reg_addr);
+	i2c_wait_tx_empty(port_idx);
+\*
+#if 0
+	c20 = io_read32(TWSI_WFIFO_WPTR + port_base);
+	c21 = io_read32(TWSI_WFIFO_WPTR + port_base);
+#else
+	c20 = io_read32(TWSI_WFIFO_RPTR + port_base);
+	c21 = io_read32(TWSI_WFIFO_RPTR + port_base);
+#endif*\
+	io_write32(TWSI_WFIFO + port_base,
+		   START_BYTE_CNTROL | I2C_SLAVE_READ(slave_addr));
+	i2c_wait_tx_empty(port_idx);
+\*
+#if 0
+	c30 = io_read32(TWSI_WFIFO_WPTR + port_base);
+	c31 = io_read32(TWSI_WFIFO_WPTR + port_base);
+#else
+	c30 = io_read32(TWSI_WFIFO_RPTR + port_base);
+	c31 = io_read32(TWSI_WFIFO_RPTR + port_base);
+#endif*\
+	io_write32(TWSI_WFIFO + port_base,
+		   RX_END_BYTE_CNTROL | I2C_SLAVE_READ(slave_addr));
+\*
+#if 0
+	c40 = io_read32(TWSI_WFIFO_WPTR + port_base);
+	c41 = io_read32(TWSI_WFIFO_WPTR + port_base);
+#else
+	c40 = io_read32(TWSI_WFIFO_RPTR + port_base);
+	c41 = io_read32(TWSI_WFIFO_RPTR + port_base);
+#endif*\
+\*
+#if 0
+	pr_dbg("WFIFO wptr_0_0:%d\n", c00);
+	pr_dbg("WFIFO wptr_0_1:%d\n", c01);
+	pr_dbg("WFIFO wptr_1_0:%d\n", c10);
+	pr_dbg("WFIFO wptr_1_1:%d\n", c11);
+	pr_dbg("WFIFO wptr_2_0:%d\n", c20);
+	pr_dbg("WFIFO wptr_2_1:%d\n", c21);
+	pr_dbg("WFIFO wptr_3_0:%d\n", c30);
+	pr_dbg("WFIFO wptr_3_1:%d\n", c31);
+	pr_dbg("WFIFO wptr_4_0:%d\n", c40);
+	pr_dbg("WFIFO wptr_4_1:%d\n", c41);
+#else
+	pr_dbg("WFIFO rptr_0_0:%d\n", c00);
+	pr_dbg("WFIFO rptr_0_1:%d\n", c01);
+	pr_dbg("WFIFO rptr_1_0:%d\n", c10);
+	pr_dbg("WFIFO rptr_1_1:%d\n", c11);
+	pr_dbg("WFIFO rptr_2_0:%d\n", c20);
+	pr_dbg("WFIFO rptr_2_1:%d\n", c21);
+	pr_dbg("WFIFO rptr_3_0:%d\n", c30);
+	pr_dbg("WFIFO rptr_3_1:%d\n", c31);
+	pr_dbg("WFIFO rptr_4_0:%d\n", c40);
+	pr_dbg("WFIFO rptr_4_1:%d\n", c41);
+#endif*\
+	i2c_fifo_wait_status(port_idx, TWSI_ISR_TXDONE | TWSI_ISR_TXE);
+	
+	value = io_read32(TWSI_RFIFO + port_base);
+
+	i2c_fifo_clear_status(port_idx, I2C_INT_ALL);
+	i2c_clear_tx_rx_fifo(port_idx);
+	i2c_fifo_clear_control(port_idx);
+
+	return value;
+}
+
+static int i2c_tx_fifo_not_overflow(int port_idx)
+{
+	uint32_t port_base = twsi_base[port_idx];
+	uint32_t wptr;
+	uint32_t rptr;
+	int ret;
+
+	wptr = io_read32(TWSI_WFIFO_WPTR + port_base);
+	rptr = io_read32(TWSI_WFIFO_RPTR + port_base);
+
+	if(wptr - rptr > 16)
+		ret = 0;
+	else
+		ret = 1;
+
+	return ret;
+}
+
+static void i2c_fifo_wait_tx_empty(int port_idx)
+{
+	uint32_t port_base = twsi_base[port_idx];
+	uint32_t i = 0;
+	uint32_t st;
+
+	pr_dbg("TWSI status: 0x%x\n", io_read32(TWSI_ISR + port_base));
+	while ((TWSI_ISR_TXE & (st = io_read32(TWSI_ISR + port_base))) != TWSI_ISR_TXE) {
+
+		if (i++ > 200) {
+			\*1s timeout *\
+			pr_err
+			    ("Error: i2c_fifo_wait_status time out: 0x%x, 0x%x!\n",
+			     TWSI_ISR_TXE, st);
+		}
+	}
+
+	return;
+}
+
+volatile int *p = 0x20000000;
+	volatile int *q = 0x30000000;
+	
+	int i;
+	for (i = 0; i < 0x10000; i++) {
+		p[i] = i;
+		q[i] = 0xffff;
+	}
+
+	memcpy_dma(q, p, 0x10000 * sizeof(int));
+
+	for (i = 0; i < 0x10000; i++) {
+		if (q[i] != i) {
+			trace("PPPPPPPPPPPPPPPPPPPpppp\n");
+			break;
+		}
+	}
+
+	make p=aquilac -j8;adb root;adb remount;adb push out\aquilac\adsp.img \system\vendor\firmware\ ; adb shell sync;adb reboot;
+	
+	adps I2C stress test.
+	char val;
+	int rval = 0;
+	int i = 0;
+	
+	pr_dbg("test_i2c1 start!\n");
+	rval |= i2c_bus_init(0, I2C_FAST_MODE);
+
+	\* reset sensor *\
+	i2c_fifo_tx_8a_8d(0, LTR_579ALS_I2C_ADDR, 0x00, 0x10);
+	pr_dbg("sensor reset!\n");
+
+	while(1){
+		val = i2c_fifo_rx_8a_8d(0, LTR_579ALS_I2C_ADDR, LTR_579ALS_ID_REG);
+
+		if (val != LTR_579ALS_ID_VAL)
+			return -1;
+
+		i++;
+		if(i == 1000){
+			pr_dbg("Test OK!\n");
+			i = 0;
+		}
+	}
+
+\\20180310------------------lora project	
+	extern void trace(const char *x_format, ...);
+void SPI_1_InterruptHandler(void)
+{
+	volatile uint32 RxIntSts = SPI_1_GetRxInterruptSourceMasked();
+	volatile uint32 TxIntSts = SPI_1_GetTxInterruptSourceMasked();
+	if (0u != (RxIntSts & SPI_1_INTR_RX_PARITY_ERROR))
+	{
+		SPI_1_ClearRxInterruptSource(SPI_1_INTR_RX_PARITY_ERROR);
+
+		trace("SPI Rx Parity Error!\n");
+	}
+	if (0u != (RxIntSts & SPI_1_INTR_RX_NOT_EMPTY))
+	{
+		SPI_1_ClearRxInterruptSource(SPI_1_INTR_RX_NOT_EMPTY);
+
+		trace("SPI Rx FiFo Not Empty!\n");
+	}
+	if (0u != (RxIntSts & SPI_1_INTR_RX_FIFO_LEVEL))
+	{
+		SPI_1_ClearRxInterruptSource(SPI_1_INTR_RX_FIFO_LEVEL);
+
+		trace("SPI Rx FiFo Level Triggled!\n");
+	}
+	if (0u != (TxIntSts & SPI_1_INTR_TX_NOT_FULL))
+	{
+		SPI_1_ClearTxInterruptSource(SPI_1_INTR_TX_NOT_FULL);
+
+		trace("SPI Tx FiFo Not Full!\n");
+	}
+	if (0u != (TxIntSts & SPI_1_INTR_TX_FIFO_LEVEL))
+	{
+		SPI_1_ClearTxInterruptSource(SPI_1_INTR_TX_FIFO_LEVEL);
+
+		trace("SPI Tx FiFo Level Triggled!\n");
+	}
+	
+}
+
+
+\\20180418------aquilac SSP module test
+test:
+spi_dma_rx_test ssp0_26m
+
+\\20180420---------lora  binary
+
+ SPI_1_Stop();
+	SPI_1_miso_m_SetDriveMode(SPI_1_miso_m_DM_DIG_HIZ);
+	SPI_1_mosi_m_SetDriveMode(SPI_1_mosi_m_DM_DIG_HIZ);
+	SPI_1_sclk_m_SetDriveMode(SPI_1_sclk_m_DM_DIG_HIZ);
+    while(1)
+    {
+        uart_rts_Write(1);
+        trace("Hello World!!Hello ASR!!");
+    }
+	
+	
+2018\5\9    ADSP  power state
+
+上电的时候ADSP pmu状态：处于power on状态。
+
+对于DSP的core有不同的状态，比如standby  sleep。
+ADSP的PMU想进入低功耗模式，前提是ADSP进入standby模式。
+PMU四种状态，power on \clock gating\plloff\poweroff
+ADSP的core进入了standby模式后，系统会根据vote情况自动进入不同模式。
+
+
+2018\5\24
+	PingPong测试(待测芯片发起通讯请求, 主机检测发送数据是否正确。
+然后主机将收到的包（SNR+RSSI）进行校验，最后将收的包和校验结果(SNR+RSSI+CHECKSUM)打成一个buffer, 返回给待测机(对应待测芯片的TX性能), 
+待测机收到buffer后取出CHECKSUM来校验接收到的SNR+RSSI的正确性, 并打印出主机发送的M: SNR+RSSI。
+同时读取自己的SNR和RSSI，并打印输出S:SNR+RSSI。最后返回状态给L命令的状态机.
+
+
+2018\5\31
+
+static RtcCalendar_t RtcComputeTimerTimeToAlarmTick( TimerTime_t timeCounter, RtcCalendar_t now )
+
+该函数功能是将当前的日历时间加上timeCount返回一个新的日历时间。
+日历时间是按tick算的。
+实例实现中1秒钟有2048个tick。
+2048个tick加1秒。
+
+void RtcSetTimeout( uint32_t timeout )------这里timeout值是ms
+{
+    RtcStartWakeUpAlarm( RtcConvertMsToTick( timeout ) );将ms转换成tick后开始Alarm
+}
+
+
+2018\06\22
+systimer2:
+(void)CyIntSetVector(13u, &CySysTimerIsr);
+	CyIntEnable(13u);
+	CY_SET_REG32((void *)(CYREG_WCO_WDT_CONFIG), 0x10010000u);
+	CySysClkSetTimerSource(CY_SYS_CLK_TIMER_SRC_WCO);
+	CY_SET_REG32((void *)(CYREG_WCO_WDT_CONTROL), 0x00080000u);
+	while ((CY_GET_XTND_REG32((void CYFAR *)(CYREG_WCO_WDT_CONTROL)) & 0x00080000u) != 0u) { }
+	CY_SET_REG32((void *)(CYREG_WCO_WDT_CONTROL), 0x00010000u);
+
+	
+	
+	-c -mcpu=cortex-m0plus -mthumb -I. -IGenerated_Source\PSoC4 -Wa,-alh=output\debug\CortexM0p\main.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og main.c -o output\debug\CortexM0p\main.o
+	
+	
+	/cygdrive/z/GnuWin32/bin
+	
+	
+	
+	\\10.1.25.244 外转内地址
+	
+	
+	crane文档：http://project.asrmicro.com:8080/share/page/site/asr001/document-details?nodeRef=workspace://SpacesStore/7a16db05-c7fc-463b-8563-ae5d75d4da74
+	file:E:\yuanzhi\proj\crane\hal\chip\uart\uart.c,function:UartIsrEntry,line:526,int_no:232.(port1)
+	file:E:\yuanzhi\proj\crane\hal\chip\uart\uart.c,function:UartIsrEntry,line:526,int_no:200.(port0)
+	
